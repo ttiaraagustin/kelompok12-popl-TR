@@ -1,5 +1,21 @@
 <?php
 
+//* -admin-
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\UserController;
+
+//* -auth-
+use App\Http\Controllers\Auth\LoginController;
+
+//* -dokter-
+use App\Http\Controllers\Dokter\DokterController;
+use App\Http\Controllers\Dokter\PasienController;
+use App\Http\Controllers\Dokter\RiwayatBerobatController;
+
+//* -obat-
+use App\Http\Controllers\Obat\ObatController;
+use App\Http\Controllers\Obat\ResepObatController;
+
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +29,32 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+// Route::get('/', function () {
+//     return view('pages.admin.index');
+// });
+
+//* -auth-
+Route::get('/', [LoginController::class, 'index'])->name('login');
+Route::get('/login', [LoginController::class, 'index']);
+Route::post('/login/auth', [LoginController::class, 'authenticate'])->name('auth.login');
+Route::get('/logout/auth', [LoginController::class, 'logout']);
+Route::post('/logout/auth', [LoginController::class, 'logout'])->name('auth.logout');
+
+//* -admin-
+Route::middleware(['auth', 'isAdmin'])->group(function () {
+    Route::get('/admin-panel', [AdminController::class, 'index'])->name('admin');
+    Route::resource('/admin-panel/user', UserController::class);
+});
+
+//* -dokter-
+Route::middleware(['auth', 'isDokter'])->group(function () {
+    Route::get('/dokter-panel', [DokterController::class, 'index'])->name('dokter');
+});
+
+//* -admin & dokter-
+Route::middleware(['auth', 'isAdminAndDokter'])->group(function () {
+    Route::resource('/pasien', PasienController::class);
+    Route::resource('/riwayat-berobat', RiwayatBerobatController::class);
+    Route::resource('/resep-obat', ResepObatController::class);
+    Route::resource('/obat', ObatController::class);
 });
